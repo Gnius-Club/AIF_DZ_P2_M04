@@ -3,743 +3,773 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El Laboratorio de las Palabras Mágicas</title>
-    <meta name="description" content="Un juego para aprender a ser respetuoso y amable en los chats escolares.">
+    <title>El Laboratorio de las Palabras Mágicas - Edición Escolar</title>
+    <meta name="description" content="Juego de ciudadanía digital para niños de primaria. Aprende empatía y respeto.">
     
     <style>
         /* --- ESTILOS GENERALES Y FUENTES --- */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
 
         :root {
-            --bg-color: #f0f4f8;
+            --bg-color: #e0f7fa;
             --main-bg: #ffffff;
-            --primary-color: #4a47a3;
-            --secondary-color: #706fd3;
-            --accent-color: #f6b93b;
-            --text-color: #333;
-            --success-color: #4caf50;
-            --error-color: #f44336;
-            --neutral-color: #2196f3;
-            --heart-color: #ff4757;
-            --font-family: 'Poppins', sans-serif;
+            --primary-color: #5e35b1; /* Violeta mágico */
+            --secondary-color: #7e57c2;
+            --accent-color: #ffca28; /* Dorado */
+            --text-color: #37474f;
+            --success-color: #66bb6a;
+            --warning-color: #ffa726;
+            --error-color: #ef5350;
+            --slot-empty: #eceff1;
+            --slot-border: #cfd8dc;
+            --font-main: 'Poppins', sans-serif;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
 
         html, body {
             height: 100%;
-            font-family: var(--font-family);
+            font-family: var(--font-main);
             background-color: var(--bg-color);
+            background-image: radial-gradient(#b2ebf2 10%, transparent 10%);
+            background-size: 20px 20px;
             color: var(--text-color);
-            line-height: 1.6;
         }
 
-        /* --- CONTENEDOR PRINCIPAL Y PANTALLAS --- */
+        /* --- LAYOUT PRINCIPAL --- */
         #game-container {
-            max-width: 1200px;
+            max-width: 1024px;
             margin: 0 auto;
-            padding: 20px;
-            height: 100%;
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            padding: 10px;
         }
 
         .screen {
+            flex: 1;
+            background: var(--main-bg);
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(94, 53, 177, 0.2);
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            flex-grow: 1;
-            padding: 20px;
-            background: var(--main-bg);
-            border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            position: relative;
+            overflow-y: auto;
+            border: 4px solid var(--primary-color);
         }
 
         .hidden { display: none !important; }
 
-        /* --- PANTALLA DE INTRODUCCIÓN --- */
-        #intro-screen h1 {
-            color: var(--primary-color);
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        #intro-screen p {
-            max-width: 600px;
-            margin-bottom: 1.5rem;
-        }
-        .lexi-avatar {
-            font-size: 5rem;
-            margin-bottom: 1rem;
-            animation: float 3s ease-in-out infinite;
-        }
-        .rules-preview {
+        /* --- HEADER Y PROGRESO --- */
+        header {
+            width: 100%;
             display: flex;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px dashed var(--slot-border);
         }
-        .rule-card {
-            background-color: #eef2f7;
-            border: 2px solid var(--secondary-color);
-            border-radius: 10px;
-            padding: 15px;
-            width: 150px;
-        }
-        .rule-card h3 { color: var(--primary-color); }
 
-        /* --- PANTALLA DE JUEGO PRINCIPAL --- */
-        #game-screen {
+        .level-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 800;
+        }
+
+        /* --- PANTALLA INTRO --- */
+        #intro-screen { justify-content: center; text-align: center; }
+        .lexi-big { font-size: 6rem; margin-bottom: 10px; animation: bounce 2s infinite; }
+        h1 { color: var(--primary-color); font-size: 2.2rem; margin-bottom: 10px; line-height: 1.2; }
+        .intro-text { font-size: 1.1rem; max-width: 600px; margin-bottom: 30px; }
+        
+        /* --- PANTALLA DE JUEGO (GRID) --- */
+        #game-layout {
             display: grid;
-            grid-template-areas:
-                "header header"
-                "character crafting"
-                "ingredients ingredients"
-                "footer footer";
-            grid-template-rows: auto 1fr auto auto;
-            grid-template-columns: 1fr 1.5fr;
+            grid-template-columns: 1fr 2fr;
+            grid-template-rows: auto 1fr;
             gap: 20px;
-            padding: 20px;
+            width: 100%;
             height: 100%;
         }
 
-        header { grid-area: header; text-align: center; }
-        #character-panel { grid-area: character; }
-        #crafting-panel { grid-area: crafting; }
-        #ingredients-panel { grid-area: ingredients; }
-        footer { grid-area: footer; }
-        
-        /* --- ESTILOS DE PANELES --- */
-        .panel {
-            background: #fdfdff;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        /* --- ZONA DE PERSONAJE (IZQUIERDA) --- */
+        .character-zone {
+            background: #fff3e0;
+            border-radius: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            align-items: center;
+            text-align: center;
+            border: 2px solid var(--warning-color);
+        }
+        .avatar { font-size: 4rem; margin-bottom: 5px; transition: transform 0.3s; }
+        .chat-bubble {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            border-top-left-radius: 0;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
+            font-style: italic;
+            position: relative;
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+        .chat-bubble::before {
+            content: ''; position: absolute; top: 0; left: -10px;
+            border: 10px solid transparent; border-top-color: white;
         }
         
-        /* Personaje */
-        #character-panel { align-items: center; text-align: center; }
-        #character-avatar {
-            width: 100px;
-            height: 100px;
-            background: var(--secondary-color);
-            border-radius: 50%;
+        /* Medidor de Corazones */
+        .hearts-container { font-size: 2rem; margin: 10px 0; display: flex; gap: 5px; }
+        .heart { color: #ccc; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .heart.active { color: #ff5252; transform: scale(1.1); }
+        .heart.broken { animation: shake 0.5s; color: #ff5252; opacity: 0.5; }
+
+        /* --- ZONA DE CRAFTEO (DERECHA) --- */
+        .crafting-zone {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Área de Slots (La Frase) */
+        .slots-area {
+            background: #f3e5f5;
+            border-radius: 20px;
+            padding: 20px;
+            min-height: 100px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: flex-start; /* Alineado a la izquierda como escritura */
+            border: 2px dashed var(--secondary-color);
+            position: relative;
+        }
+        .slots-label {
+            position: absolute; top: -12px; left: 20px;
+            background: var(--secondary-color); color: white;
+            padding: 2px 10px; border-radius: 10px; font-size: 0.8rem;
+        }
+
+        /* El Slot Individual */
+        .slot {
+            height: 50px;
+            background: white;
+            border: 2px solid var(--slot-border);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
-            color: white;
-            margin-bottom: 10px;
+            min-width: 80px;
+            padding: 0 15px;
+            font-weight: 600;
+            color: #90a4ae; /* Color del texto fantasma */
+            position: relative;
+            transition: all 0.2s;
         }
-        #character-name { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); }
-        #original-message {
-            background: #eef2f7;
-            padding: 10px;
-            border-radius: 10px;
-            width: 100%;
-            font-style: italic;
+        /* Texto Fantasma (Ayuda visual) */
+        .slot[data-ghost]::after {
+            content: attr(data-ghost);
+            position: absolute;
+            opacity: 0.3;
+            pointer-events: none;
+            font-size: 0.9rem;
+            white-space: nowrap;
         }
+        /* Slot Lleno */
+        .slot.filled {
+            background: var(--accent-color);
+            color: var(--text-color);
+            border-color: var(--warning-color);
+            box-shadow: 0 4px 0 #f9a825;
+            transform: translateY(-2px);
+            cursor: pointer;
+            animation: popIn 0.3s;
+        }
+        .slot.filled::after { content: none; } /* Ocultar fantasma si está lleno */
         
-        /* Medidor de Corazón */
-        #heart-meter { display: flex; gap: 5px; font-size: 2rem; }
-        .heart { 
-            color: #ddd;
-            transition: color 0.3s, transform 0.3s;
-        }
-        .heart.full { color: var(--heart-color); }
-        .heart.cracked {
-            color: var(--heart-color);
-            animation: shake 0.5s;
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px) rotate(-3deg); }
-            75% { transform: translateX(5px) rotate(3deg); }
-        }
-        @keyframes heart-beat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-
-        /* Caldero y Controles */
-        #crafting-panel h2 { color: var(--primary-color); }
-        #cauldron {
-            min-height: 120px;
-            background: #eef2f7;
-            border: 2px dashed var(--secondary-color);
-            border-radius: 10px;
+        /* Área de Ingredientes (Banco de palabras) */
+        .ingredients-area {
+            flex-grow: 1;
+            background: white;
             padding: 10px;
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             align-content: flex-start;
         }
-        .cauldron-word {
-            background: var(--accent-color);
-            color: white;
-            padding: 8px 12px;
+        
+        .ingredient-btn {
+            background: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 10px 15px;
             border-radius: 20px;
             font-weight: 600;
-            cursor: grab;
-            transition: opacity 0.3s;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 0 var(--secondary-color);
         }
-        .cauldron-word.dragging {
-            opacity: 0.5;
+        .ingredient-btn:hover { transform: translateY(-2px); background: #f3e5f5; }
+        .ingredient-btn:active { transform: translateY(0); }
+        .ingredient-btn.used {
+            opacity: 0; 
+            pointer-events: none;
+            transform: scale(0);
         }
-        #crafting-controls {
+        .ingredient-btn.hint-glow {
+            animation: pulse-gold 1.5s infinite;
+            background: #fff9c4;
+            border-color: #fbc02d;
+        }
+
+        /* --- CONTROLES INFERIORES --- */
+        .controls {
             display: flex;
             gap: 10px;
             margin-top: auto;
-        }
-
-        /* Ingredientes */
-        #ingredients-panel h2 { color: var(--primary-color); }
-        #ingredients-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            padding-top: 10px;
             justify-content: center;
         }
-        .ingredient {
-            background: var(--main-bg);
-            border: 2px solid var(--secondary-color);
-            color: var(--secondary-color);
-            padding: 10px 15px;
-            border-radius: 25px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: grab;
-            transition: background-color 0.2s, color 0.2s, transform 0.2s;
-        }
-        .ingredient:hover, .ingredient:focus {
-            background: var(--secondary-color);
-            color: white;
-            transform: translateY(-2px);
-        }
-        .ingredient:active { cursor: grabbing; }
-        .ingredient.disabled {
-            background: #ccc;
-            border-color: #aaa;
-            color: #888;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
 
-        /* Footer */
-        footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 10px;
-            border-top: 1px solid #ddd;
-        }
-        #progress-indicator { font-weight: bold; }
-
-        /* --- BOTONES --- */
         .btn {
             border: none;
-            border-radius: 25px;
             padding: 12px 25px;
+            border-radius: 30px;
             font-size: 1.1rem;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
-            font-family: var(--font-family);
-        }
-        .btn-primary {
-            background: var(--accent-color);
-            color: white;
-            box-shadow: 0 4px var(--primary-color);
-        }
-        .btn-primary:hover { background: #f9c74f; }
-        .btn-primary:active {
-            box-shadow: none;
-            transform: translateY(4px);
-        }
-        .btn-secondary {
-            background: #eee;
-            color: var(--primary-color);
-        }
-        #send-btn { background-color: var(--success-color); color: white; flex-grow: 1; }
-        #reset-btn { background-color: var(--error-color); color: white; flex-grow: 1; }
-
-        /* --- PANTALLAS FINALES --- */
-        #win-screen h1, #lose-screen h1 { font-size: 3rem; margin-bottom: 20px; }
-        #win-screen {
-            background: linear-gradient(45deg, #a8e063, #56ab2f);
-            color: white;
-        }
-        #win-screen .final-quote { font-style: italic; font-size: 1.3rem; margin-top: 20px; max-width: 500px; }
-        #lose-screen {
-            background: #718093;
-            color: white;
-        }
-        @keyframes confetti-fall {
-            0% { transform: translateY(-100vh) rotate(0); }
-            100% { transform: translateY(100vh) rotate(720deg); }
-        }
-        .confetti {
-            position: fixed;
-            width: 10px;
-            height: 20px;
-            background-color: var(--accent-color);
-            top: -50px;
-            opacity: 0.8;
-            animation: confetti-fall 5s linear infinite;
-        }
-
-        /* --- MODAL DE REGLAS Y FEEDBACK --- */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
+            font-family: var(--font-main);
+            transition: transform 0.1s;
             display: flex;
             align-items: center;
-            justify-content: center;
-            z-index: 1000;
+            gap: 8px;
         }
-        .modal-content {
-            background: var(--main-bg);
+        .btn:active { transform: scale(0.95); }
+        
+        .btn-send { background: var(--success-color); color: white; box-shadow: 0 4px 0 #388e3c; width: 100%; justify-content: center; }
+        .btn-hint { background: var(--bg-color); color: var(--primary-color); }
+        .btn-reset { background: var(--error-color); color: white; }
+
+        /* --- MODALES Y FEEDBACK --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        .feedback-card {
+            background: white;
             padding: 30px;
-            border-radius: 20px;
-            max-width: 500px;
+            border-radius: 30px;
+            max-width: 400px;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            position: relative;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 5px solid transparent;
         }
-        .modal-content h2 { color: var(--primary-color); margin-bottom: 15px; }
-        .close-btn {
-            position: absolute;
-            top: 15px; right: 15px;
-            background: none; border: none;
-            font-size: 1.5rem; cursor: pointer;
-        }
+        .feedback-icon { font-size: 5rem; margin-bottom: 10px; display: block; }
         
-        #feedback-modal .modal-content {
-            border-top: 10px solid;
-        }
-        #feedback-modal.success .modal-content { border-color: var(--success-color); }
-        #feedback-modal.error .modal-content { border-color: var(--error-color); }
-        #feedback-modal.neutral .modal-content { border-color: var(--neutral-color); }
-        #feedback-icon { font-size: 4rem; margin-bottom: 1rem; }
-        #feedback-lexi-voice { font-style: italic; color: #555; margin-top: 10px; }
-        
-        /* --- ACCESIBILIDAD Y ANIMACIONES --- */
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
+        .feedback-success { border-color: var(--success-color); }
+        .feedback-error { border-color: var(--error-color); }
+        .feedback-neutral { border-color: var(--warning-color); }
+
+        /* --- ANIMACIONES --- */
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        @keyframes pulse-gold { 0% { box-shadow: 0 0 0 0 rgba(255, 202, 40, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 202, 40, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 202, 40, 0); } }
 
         /* --- RESPONSIVIDAD --- */
         @media (max-width: 768px) {
-            #game-container { padding: 10px; }
-            #game-screen {
-                grid-template-areas:
-                    "header"
-                    "character"
-                    "crafting"
-                    "ingredients"
-                    "footer";
-                grid-template-columns: 1fr;
-                grid-template-rows: auto;
-                height: auto;
-            }
-            .panel { padding: 15px; }
-            h1 { font-size: 2rem; }
-            .btn { font-size: 1rem; padding: 10px 20px; }
-            #cauldron { min-height: 80px; }
+            #game-layout { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
+            .slots-area { min-height: 80px; }
+            h1 { font-size: 1.5rem; }
+            .character-zone { flex-direction: row; align-items: center; gap: 15px; padding: 10px; }
+            .avatar { font-size: 3rem; margin: 0; }
+            .chat-bubble { font-size: 0.9rem; margin: 0; width: 100%; }
         }
-
     </style>
 </head>
 <body>
 
-    <div id="game-container" role="main">
-
-        <!-- ===== PANTALLA DE INTRODUCCIÓN ===== -->
+    <div id="game-container">
+        
+        <!-- PANTALLA INTRO -->
         <div id="intro-screen" class="screen">
-            <div class="lexi-avatar" aria-hidden="true">📖</div>
-            <h1>El Laboratorio de las Palabras Mágicas</h1>
-            <p>¡Hola, Mensajero del Corazón! Soy Lexi, tu libro mágico. En el Foro Escolar, ¡cada palabra es un hechizo! Algunas palabras alegran los corazones ❤️, pero otras pueden dañarlos 💔. Tu misión es crear mensajes que cuiden a tus amigos.</p>
-            <div class="rules-preview">
-                <div class="rule-card"><h3>Sé Amable</h3><p>Usa saludos y palabras bonitas.</p></div>
-                <div class="rule-card"><h3>Sé Respetuoso</h3><p>Critica ideas, no a las personas.</p></div>
-                <div class="rule-card"><h3>Sé Buen Amigo</h3><p>Ayuda y apoya a los demás.</p></div>
-            </div>
+            <div class="lexi-big">📖</div>
+            <h1>El Laboratorio de<br>Palabras Mágicas</h1>
+            <p class="intro-text">¡Hola! Soy <strong>Lexi</strong>. En el colegio, las palabras son como pociones: pueden curar o pueden herir. <br><br>¿Me ayudas a crear los mensajes perfectos para nuestros amigos?</p>
+            <button id="start-btn" class="btn btn-send" style="width: auto; padding: 15px 40px;">¡Vamos a jugar!</button>
             <br>
-            <button id="start-game-btn" class="btn btn-primary">¡Ir al Foro!</button>
+            <small style="color: #888;">Para niños de 2° Primaria - Misión: Empatía</small>
         </div>
 
-        <!-- ===== PANTALLA DE JUEGO ===== -->
+        <!-- PANTALLA DE JUEGO -->
         <div id="game-screen" class="screen hidden">
             <header>
-                <h1 id="scenario-title">Desafío 1</h1>
+                <div class="level-info">
+                    <span id="level-badge" class="level-badge">Nivel 1</span>
+                    <strong style="margin-left: 10px; color: var(--primary-color);">Misión de Lexi</strong>
+                </div>
+                <button id="help-btn" class="btn btn-hint" title="Pedir ayuda a Lexi">💡 Pista</button>
             </header>
 
-            <div id="character-panel" class="panel">
-                <div id="character-avatar" aria-hidden="true"></div>
-                <h2 id="character-name"></h2>
-                <div id="heart-meter" role="img" aria-label="Medidor de Corazón"></div>
-                <p id="original-message"></p>
-            </div>
+            <div id="game-layout">
+                <!-- PANEL PERSONAJE -->
+                <div class="character-zone">
+                    <div id="char-avatar" class="avatar">😢</div>
+                    <div>
+                        <strong id="char-name" style="color: var(--secondary-color);">Ana</strong>
+                        <div class="hearts-container" id="hearts-container">
+                            <!-- Corazones generados por JS -->
+                        </div>
+                    </div>
+                    <div id="char-msg" class="chat-bubble">"Estoy triste, mi perro se enfermó."</div>
+                </div>
 
-            <div id="crafting-panel" class="panel">
-                <h2>Caldero de Mensajes</h2>
-                <div id="cauldron" role="log" aria-live="polite" aria-label="Mensaje que estás construyendo"></div>
-                <div id="crafting-controls">
-                    <button id="send-btn" class="btn">Mezclar y Enviar</button>
-                    <button id="reset-btn" class="btn">Rehacer</button>
+                <!-- PANEL CRAFTEO -->
+                <div class="crafting-zone">
+                    <h3 style="color: var(--primary-color); margin-bottom: -15px; z-index: 1;">Tu Respuesta:</h3>
+                    
+                    <!-- Aquí van las casillas (Slots) -->
+                    <div id="slots-container" class="slots-area">
+                        <span class="slots-label">Construye aquí</span>
+                        <!-- Slots generados por JS -->
+                    </div>
+
+                    <!-- Aquí van los ingredientes -->
+                    <div>
+                        <h3 style="color: var(--primary-color);">Ingredientes:</h3>
+                        <div id="ingredients-container" class="ingredients-area">
+                            <!-- Botones generados por JS -->
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="controls">
+                        <button id="reset-level-btn" class="btn btn-reset">↺ Borrar</button>
+                        <button id="send-msg-btn" class="btn btn-send">✉️ Enviar Mensaje</button>
+                    </div>
                 </div>
             </div>
-
-            <div id="ingredients-panel" class="panel">
-                <h2>Ingredientes de Palabras</h2>
-                <div id="ingredients-container"></div>
-            </div>
-
-            <footer>
-                <span id="progress-indicator" aria-live="polite">Escenario 1 de 5</span>
-                <button id="rules-btn" class="btn btn-secondary">Ver Reglas</button>
-            </footer>
         </div>
 
-        <!-- ===== PANTALLA DE VICTORIA ===== -->
-        <div id="win-screen" class="screen hidden">
-            <div id="confetti-container"></div>
-            <h1>¡Misión Cumplida, Maestro Mensajero!</h1>
-            <p id="win-stats"></p>
-            <p class="final-quote">"¡Con palabras de respeto y de valor, construyo amistad y un mundo mejor!"</p>
-            <br>
-            <button id="play-again-btn" class="btn btn-primary">Jugar de Nuevo</button>
-        </div>
-
-        <!-- ===== MODAL DE REGLAS ===== -->
-        <div id="rules-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="rules-title">
-            <div class="modal-content">
-                <button class="close-btn" aria-label="Cerrar">&times;</button>
-                <h2 id="rules-title">Las 3 Reglas del Chat</h2>
-                <ul>
-                    <li><strong>Sé Amable:</strong> Siempre saluda y usa palabras bonitas como "por favor" y "gracias".</li>
-                    <li><strong>Sé Respetuoso:</strong> Si no estás de acuerdo con algo, explica por qué sin insultar a la otra persona. ¡Ataca la idea, no a la persona!</li>
-                    <li><strong>Sé Buen Amigo:</strong> Si ves que alguien está triste o confundido, ofrécele tu ayuda y anímale. ¡Validar sus sentimientos es muy importante!</li>
-                </ul>
+        <!-- PANTALLA FINAL -->
+        <div id="end-screen" class="screen hidden" style="text-align: center; justify-content: center;">
+            <div class="lexi-big">🏆</div>
+            <h1 style="color: var(--success-color);">¡Misión Cumplida!</h1>
+            <p class="intro-text">Has completado tu entrenamiento como <strong>Mensajero del Corazón</strong>. Tus palabras han llenado el foro de alegría y respeto.</p>
+            <div style="background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 2px dashed var(--accent-color);">
+                <p>"¡Con palabras de respeto y de valor,<br>construyo amistad y un mundo mejor!"</p>
             </div>
-        </div>
-
-        <!-- ===== MODAL DE FEEDBACK ===== -->
-        <div id="feedback-modal" class="modal-overlay hidden" role="alertdialog" aria-modal="true" aria-labelledby="feedback-title">
-            <div class="modal-content">
-                <div id="feedback-icon" aria-hidden="true"></div>
-                <h2 id="feedback-title"></h2>
-                <p id="feedback-text"></p>
-                <p id="feedback-lexi-voice"></p>
-                <br>
-                <button class="btn btn-primary close-feedback-btn">Entendido</button>
-            </div>
+            <button onclick="location.reload()" class="btn btn-send" style="width: auto;">Jugar otra vez</button>
         </div>
 
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    <!-- MODAL DE FEEDBACK -->
+    <div id="feedback-modal" class="modal-overlay hidden">
+        <div id="feedback-card" class="feedback-card">
+            <span id="fb-icon" class="feedback-icon">✨</span>
+            <h2 id="fb-title">¡Excelente!</h2>
+            <p id="fb-msg">Tus palabras curaron el corazón de Ana.</p>
+            <br>
+            <button id="fb-btn" class="btn btn-send" style="width: auto;">Continuar</button>
+        </div>
+    </div>
 
-        // --- DATOS DEL JUEGO ---
-        const scenarios = [
-            { id: 1, nombre: "El Amigo Triste", personaje: "Ana", avatar: "😢", mensajeOriginal: "Estoy triste, mi perro se enfermó.", ingredientes: ["Lo siento mucho,", "¡Ánimo!", "Ana,", "No es para tanto,", "Espero que se mejore."], solucion: ["Lo siento mucho,", "Ana,", "Espero que se mejore.", "¡Ánimo!"], palabrasDaninas: ["No es para tanto,"], corazonesIniciales: 2, tipo: "consuelo" },
-            { id: 2, nombre: "El Desacuerdo Respetuoso", personaje: "Leo", avatar: "🤔", mensajeOriginal: "¡El mejor superhéroe es Capitán Cometa! ¡No hay discusión!", ingredientes: ["Estás equivocado,", "Respeto tu opinión,", "Capitán Cometa es aburrido,", "pero a mí me gusta más Dra. Estrella.", "porque es más inteligente."], solucion: ["Respeto tu opinión,", "pero a mí me gusta más Dra. Estrella.", "porque es más inteligente."], palabrasDaninas: ["Estás equivocado,", "Capitán Cometa es aburrido,"], corazonesIniciales: 4, tipo: "desacuerdo" },
-            { id: 3, nombre: "La Felicitación", personaje: "Sara", avatar: "😊", mensajeOriginal: "¡Miren el castillo de bloques que construí!", ingredientes: ["El mío es mejor.", "¡Wow, Sara!", "¡Qué increíble!", "Te quedó genial."], solucion: ["¡Wow, Sara!", "¡Qué increíble!", "Te quedó genial."], palabrasDaninas: ["El mío es mejor."], corazonesIniciales: 4, tipo: "felicitacion" },
-            { id: 4, nombre: "Malentendido en el Juego", personaje: "Marco", avatar: "😠", mensajeOriginal: "¡Perdimos por tu culpa! ¡No me pasaste la pelota a tiempo!", ingredientes: ["No es mi culpa,", "Tú eres el malo,", "Entiendo que estés frustrado,", "pero todos somos un equipo.", "la próxima vez lo haremos mejor.", "¡Cálmate!"], solucion: ["Entiendo que estés frustrado,", "pero todos somos un equipo.", "la próxima vez lo haremos mejor."], palabrasDaninas: ["No es mi culpa,", "Tú eres el malo,", "¡Cálmate!"], corazonesIniciales: 1, tipo: "conflicto" },
-            { id: 5, nombre: "La Pregunta Confusa", personaje: "Lucía", avatar: "😟", mensajeOriginal: "No entendí nada de la tarea, ¿alguien me ayuda? Me siento tonta.", ingredientes: ["Es muy fácil,", "No te preocupes,", "a mí también me costó al principio.", "¿Quieres que lo repasemos juntos por videollamada?", "Lee otra vez.", "Lucía,"], solucion: ["No te preocupes,", "Lucía,", "a mí también me costó al principio.", "¿Quieres que lo repasemos juntos por videollamada?"], palabrasDaninas: ["Es muy fácil,", "Lee otra vez."], corazonesIniciales: 2, tipo: "ayuda" }
+    <script>
+        // --- BASE DE DATOS DE NIVELES (CONFIGURACIÓN) ---
+        // difficulty: 'easy' (muestra texto fantasma), 'normal' (solo casillas vacías)
+        const levels = [
+            {
+                id: 1,
+                title: "Consuelo",
+                character: "Ana",
+                avatar: "😢",
+                message: "Estoy triste, mi perro se enfermó.",
+                hearts: 2, // Corazones actuales del personaje
+                difficulty: 'easy', 
+                ingredients: ["Lo siento mucho,", "¡Ánimo!", "Ana,", "No es para tanto,", "Espero que se mejore."],
+                // validSequences: Arrays de soluciones aceptadas (orden importa)
+                validSequences: [
+                    ["Lo siento mucho,", "Ana,", "Espero que se mejore.", "¡Ánimo!"],
+                    ["Ana,", "Lo siento mucho,", "Espero que se mejore.", "¡Ánimo!"],
+                    ["Lo siento mucho,", "Espero que se mejore.", "¡Ánimo!", "Ana,"]
+                ],
+                harmfulWords: ["No es para tanto,"],
+                lexiHint: "Empieza disculpándote o diciendo su nombre con cariño."
+            },
+            {
+                id: 2,
+                title: "Respeto",
+                character: "Leo",
+                avatar: "😡",
+                message: "¡El mejor es Capitán Cometa! ¡Los demás no saben nada!",
+                hearts: 4, // Está un poco agitado
+                difficulty: 'easy',
+                ingredients: ["Estás equivocado,", "Respeto tu opinión,", "es aburrido,", "pero a mí me gusta Dra. Estrella.", "porque es lista."],
+                validSequences: [
+                    ["Respeto tu opinión,", "pero a mí me gusta Dra. Estrella.", "porque es lista."]
+                ],
+                harmfulWords: ["Estás equivocado,", "es aburrido,"],
+                lexiHint: "Aunque no estemos de acuerdo, primero mostramos respeto."
+            },
+            {
+                id: 3,
+                title: "Felicitación",
+                character: "Sara",
+                avatar: "😁",
+                message: "¡Miren el castillo que construí! (Foto)",
+                hearts: 4,
+                difficulty: 'normal', // Ya no mostramos texto fantasma
+                ingredients: ["El mío es mejor.", "¡Wow, Sara!", "¡Qué increíble!", "Te quedó genial."],
+                validSequences: [
+                    ["¡Wow, Sara!", "¡Qué increíble!", "Te quedó genial."],
+                    ["¡Wow, Sara!", "Te quedó genial.", "¡Qué increíble!"],
+                    ["Sara,", "¡Qué increíble!", "Te quedó genial."] // Variación flexible
+                ],
+                harmfulWords: ["El mío es mejor."],
+                lexiHint: "¡Usa palabras de celebración! Hazla sentir especial."
+            },
+            {
+                id: 4,
+                title: "Conflicto",
+                character: "Marco",
+                avatar: "😤",
+                message: "¡Perdimos por tu culpa! ¡Jugaste mal!",
+                hearts: 1, // Corazón roto
+                difficulty: 'normal',
+                ingredients: ["No es mi culpa,", "Entiendo que estés molesto,", "pero somos un equipo.", "la próxima ganamos."],
+                validSequences: [
+                    ["Entiendo que estés molesto,", "pero somos un equipo.", "la próxima ganamos."]
+                ],
+                harmfulWords: ["No es mi culpa,"],
+                lexiHint: "Valida sus sentimientos primero ('Entiendo...'), luego une al equipo."
+            },
+            {
+                id: 5,
+                title: "Ayuda",
+                character: "Lucía",
+                avatar: "😟",
+                message: "No entiendo la tarea. Me siento tonta.",
+                hearts: 2,
+                difficulty: 'normal',
+                ingredients: ["Es muy fácil,", "No te preocupes,", "¿Quieres que estudiemos?", "juntos."],
+                validSequences: [
+                    ["No te preocupes,", "¿Quieres que estudiemos?", "juntos."]
+                ],
+                harmfulWords: ["Es muy fácil,"],
+                lexiHint: "Dile que no se preocupe y ofrece ayuda concreta."
+            }
         ];
 
-        // --- VARIABLES DE ESTADO DEL JUEGO ---
-        let currentScenarioIndex = 0;
-        let cauldronWords = [];
-        let totalHearts = 0;
-        let stats = { consuelo: 0, desacuerdo: 0, felicitacion: 0, conflicto: 0, ayuda: 0 };
+        // --- ESTADO DEL JUEGO ---
+        let currentLevelIndex = 0;
+        let currentLevelData = null;
+        let filledSlots = []; // Array con el contenido actual de los slots
 
-        // --- SELECTORES DEL DOM ---
+        // --- REFERENCIAS DOM ---
         const introScreen = document.getElementById('intro-screen');
         const gameScreen = document.getElementById('game-screen');
-        const winScreen = document.getElementById('win-screen');
-        const startGameBtn = document.getElementById('start-game-btn');
-        const cauldron = document.getElementById('cauldron');
+        const endScreen = document.getElementById('end-screen');
+        const slotsContainer = document.getElementById('slots-container');
         const ingredientsContainer = document.getElementById('ingredients-container');
-        // ... (otros selectores)
-        const scenarioTitle = document.getElementById('scenario-title');
-        const characterAvatar = document.getElementById('character-avatar');
-        const characterName = document.getElementById('character-name');
-        const heartMeter = document.getElementById('heart-meter');
-        const originalMessage = document.getElementById('original-message');
-        const sendBtn = document.getElementById('send-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const progressIndicator = document.getElementById('progress-indicator');
-        const rulesBtn = document.getElementById('rules-btn');
-        const rulesModal = document.getElementById('rules-modal');
+        const heartsContainer = document.getElementById('hearts-container');
         const feedbackModal = document.getElementById('feedback-modal');
+        const feedbackCard = document.getElementById('feedback-card');
+
+        // --- SONIDOS (Sintetizados para evitar archivos externos) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
-        // --- SONIDOS (Base64 para ser autocontenido) - VERSIÓN MEJORADA ---
-        const positiveSound = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"+Array(30).join("123456789987654321"));
-        const negativeSound = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"+Array(30).join("987654321123456789"));
-        const neutralSound = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"+Array(20).join("112233445566778899"));
+        function playTone(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
 
-        // --- FUNCIONES PRINCIPALES ---
-        function initGame() {
-            // ... (listeners existentes)
-            startGameBtn.addEventListener('click', startGame);
-            document.getElementById('play-again-btn').addEventListener('click', () => location.reload());
-            rulesBtn.addEventListener('click', showRules);
-            rulesModal.querySelector('.close-btn').addEventListener('click', hideRules);
-            feedbackModal.querySelector('.close-feedback-btn').addEventListener('click', hideFeedback);
-            document.addEventListener('keydown', e => { if (e.key === 'Backspace' && !gameScreen.classList.contains('hidden')) undoLastIngredient(); });
-
-            // Listeners para Drag & Drop en el Caldero
-            cauldron.addEventListener('dragover', e => e.preventDefault());
-            cauldron.addEventListener('drop', handleCauldronDrop);
+            const now = audioCtx.currentTime;
+            if (type === 'success') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now); osc.stop(now + 0.5);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            } else if (type === 'click') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(600, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+            }
         }
 
-        function startGame() {
+        // --- INICIALIZACIÓN ---
+        document.getElementById('start-btn').addEventListener('click', () => {
             introScreen.classList.add('hidden');
             gameScreen.classList.remove('hidden');
-            currentScenarioIndex = 0;
-            totalHearts = 0;
-            renderScenario(currentScenarioIndex);
+            loadLevel(0);
+        });
+
+        document.getElementById('reset-level-btn').addEventListener('click', () => {
+            loadLevel(currentLevelIndex); // Recargar limpia todo
+        });
+
+        document.getElementById('send-msg-btn').addEventListener('click', checkAnswer);
+        
+        document.getElementById('help-btn').addEventListener('click', giveHint);
+
+        document.getElementById('fb-btn').addEventListener('click', () => {
+            feedbackModal.classList.add('hidden');
+            if (feedbackModal.dataset.action === 'next') {
+                nextLevel();
+            }
+        });
+
+        // --- LÓGICA DE NIVELES ---
+
+        function loadLevel(index) {
+            currentLevelIndex = index;
+            currentLevelData = levels[index];
+            filledSlots = new Array(currentLevelData.validSequences[0].length).fill(null);
+
+            // Actualizar UI Texto
+            document.getElementById('level-badge').textContent = `Nivel ${index + 1}`;
+            document.getElementById('char-name').textContent = currentLevelData.character;
+            document.getElementById('char-avatar').textContent = currentLevelData.avatar;
+            document.getElementById('char-msg').textContent = `"${currentLevelData.message}"`;
+
+            // Renderizar Corazones
+            renderHearts(currentLevelData.hearts);
+
+            // Renderizar Slots (Estructura de la frase)
+            renderSlots();
+
+            // Renderizar Ingredientes
+            renderIngredients();
         }
 
-        function renderScenario(index) {
-            clearCauldron();
-            const scenario = scenarios[index];
-            scenarioTitle.textContent = `Desafío ${scenario.id}: ${scenario.nombre}`;
-            characterAvatar.textContent = scenario.avatar;
-            characterName.textContent = scenario.personaje;
-            originalMessage.textContent = `"${scenario.mensajeOriginal}"`;
-            progressIndicator.textContent = `Escenario ${index + 1} de ${scenarios.length}`;
-            updateHeartMeter(scenario.corazonesIniciales, true);
-            
+        function renderHearts(count) {
+            heartsContainer.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const heart = document.createElement('span');
+                heart.className = `heart ${i < count ? 'active' : ''}`;
+                heart.innerHTML = '❤️';
+                if (i < count && i === 0 && count === 1) {
+                    heart.className += ' broken';
+                    heart.innerHTML = '💔';
+                }
+                heartsContainer.appendChild(heart);
+            }
+        }
+
+        function renderSlots() {
+            slotsContainer.innerHTML = '<span class="slots-label">Tu Mensaje:</span>';
+            const solutionLength = currentLevelData.validSequences[0].length;
+            const primarySolution = currentLevelData.validSequences[0];
+
+            for (let i = 0; i < solutionLength; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.dataset.index = i;
+                
+                // --- IMPLEMENTACIÓN DE AYUDA VISUAL (Recomendación) ---
+                if (currentLevelData.difficulty === 'easy') {
+                    // Mostrar texto fantasma si el nivel es fácil
+                    slot.dataset.ghost = primarySolution[i]; 
+                } else {
+                    slot.dataset.ghost = (i + 1); // Solo números en niveles avanzados
+                }
+
+                // Si el slot ya tiene contenido (por ejemplo, si no recargamos todo)
+                if (filledSlots[i]) {
+                    slot.textContent = filledSlots[i];
+                    slot.classList.add('filled');
+                    slot.onclick = () => removeWordFromSlot(i);
+                }
+
+                slotsContainer.appendChild(slot);
+            }
+        }
+
+        function renderIngredients() {
             ingredientsContainer.innerHTML = '';
-            scenario.ingredientes.forEach(ing => {
+            // Mezclamos un poco los ingredientes para que no estén siempre en orden si el nivel es difícil
+            let words = [...currentLevelData.ingredients];
+            if (currentLevelData.difficulty === 'normal') {
+                words.sort(() => Math.random() - 0.5);
+            }
+
+            words.forEach(word => {
                 const btn = document.createElement('button');
-                btn.className = 'ingredient';
-                btn.textContent = ing;
-                btn.draggable = true;
-                btn.setAttribute('role', 'button');
-                btn.setAttribute('aria-label', `Añadir ingrediente: ${ing}`);
-                btn.addEventListener('click', () => addIngredient(ing, btn));
-                btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addIngredient(ing, btn); } });
-                btn.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', ing); });
+                btn.className = 'ingredient-btn';
+                btn.textContent = word;
+                btn.dataset.word = word;
+                
+                // Si la palabra ya está usada en un slot, la ocultamos visualmente
+                if (filledSlots.includes(word)) {
+                    btn.classList.add('used');
+                }
+
+                btn.onclick = () => addWordToNextSlot(word, btn);
                 ingredientsContainer.appendChild(btn);
             });
         }
-        
-        // --- MANEJO DE INTERACCIÓN ---
 
-        /**
-         * Añade un ingrediente al caldero y deshabilita el botón.
-         */
-        function addIngredient(word, element) {
-            if (element && element.classList.contains('disabled')) return;
-            cauldronWords.push(word);
-            if (element) element.classList.add('disabled');
-            renderCauldron();
-        }
+        // --- MECÁNICA DE JUEGO (SLOT SYSTEM) ---
 
-        /**
-         * Renderiza el caldero, haciendo cada palabra arrastrable para reordenar.
-         */
-        function renderCauldron() {
-            cauldron.innerHTML = '';
-            cauldronWords.forEach((word, index) => {
-                const wordEl = document.createElement('div');
-                wordEl.className = 'cauldron-word';
-                wordEl.textContent = word;
-                wordEl.draggable = true;
-                
-                // Eventos para reordenar dentro del caldero
-                wordEl.addEventListener('dragstart', e => {
-                    e.dataTransfer.setData('source-index', index);
-                    setTimeout(() => wordEl.classList.add('dragging'), 0);
-                });
-                wordEl.addEventListener('dragend', () => wordEl.classList.remove('dragging'));
-
-                cauldron.appendChild(wordEl);
-            });
-        }
-        
-        /**
-         * Maneja el evento de soltar (drop) en el caldero.
-         * Diferencia entre añadir un nuevo ingrediente y reordenar uno existente.
-         */
-        function handleCauldronDrop(e) {
-            e.preventDefault();
-            const sourceIndexStr = e.dataTransfer.getData('source-index');
-
-            if (sourceIndexStr !== "") { // Es un reordenamiento
-                const sourceIndex = parseInt(sourceIndexStr, 10);
-                const draggedWord = cauldronWords[sourceIndex];
-                
-                // Encuentra el elemento sobre el que se está soltando para determinar la nueva posición
-                const afterElement = getDragAfterElement(cauldron, e.clientX);
-
-                // Elimina el elemento de su posición original
-                cauldronWords.splice(sourceIndex, 1);
-
-                if (afterElement == null) {
-                    cauldronWords.push(draggedWord); // Añadir al final
-                } else {
-                    const newIndex = cauldronWords.indexOf(afterElement.textContent);
-                    cauldronWords.splice(newIndex, 0, draggedWord); // Insertar antes del elemento destino
-                }
-                renderCauldron();
-            } else { // Es un nuevo ingrediente
-                const word = e.dataTransfer.getData('text/plain');
-                const sourceElement = Array.from(ingredientsContainer.children).find(child => child.textContent === word);
-                if (sourceElement && !sourceElement.classList.contains('disabled')) {
-                    addIngredient(word, sourceElement);
-                }
+        function addWordToNextSlot(word, btnElement) {
+            // Buscar primer slot vacío
+            const firstEmptyIndex = filledSlots.findIndex(s => s === null);
+            
+            if (firstEmptyIndex !== -1) {
+                playTone('click');
+                filledSlots[firstEmptyIndex] = word;
+                btnElement.classList.add('used');
+                updateSlotVisuals(firstEmptyIndex);
             }
         }
-        
-        /**
-         * Helper para determinar qué elemento en el caldero está justo después 
-         * de la posición del cursor durante un arrastre.
-         */
-        function getDragAfterElement(container, x) {
-            const draggableElements = [...container.querySelectorAll('.cauldron-word:not(.dragging)')];
 
-            return draggableElements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = x - box.left - box.width / 2;
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
-                }
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
+        function removeWordFromSlot(index) {
+            const word = filledSlots[index];
+            if (word) {
+                playTone('click');
+                filledSlots[index] = null;
+                
+                // Reactivar el botón del ingrediente
+                const btns = Array.from(document.querySelectorAll('.ingredient-btn'));
+                const btn = btns.find(b => b.dataset.word === word && b.classList.contains('used'));
+                if (btn) btn.classList.remove('used');
 
-
-        function undoLastIngredient() {
-            if (cauldronWords.length === 0) return;
-            const lastWord = cauldronWords.pop();
-            const ingredientBtn = Array.from(ingredientsContainer.children).find(btn => btn.textContent === lastWord);
-            if (ingredientBtn) ingredientBtn.classList.remove('disabled');
-            renderCauldron();
-        }
-
-        function clearCauldron() {
-            cauldronWords = [];
-            renderCauldron();
-            Array.from(ingredientsContainer.children).forEach(btn => btn.classList.remove('disabled'));
-        }
-
-        // --- LÓGICA DE EVALUACIÓN Y FEEDBACK (SIN CAMBIOS) ---
-        resetBtn.addEventListener('click', clearCauldron);
-        sendBtn.addEventListener('click', evaluateMessage);
-        
-        function evaluateMessage() {
-            const scenario = scenarios[currentScenarioIndex];
-            const builtMessage = cauldronWords.join(" ");
-            const solutionMessage = scenario.solucion.join(" ");
-            const hasHarmfulWords = cauldronWords.some(word => scenario.palabrasDaninas.includes(word));
-
-            if (hasHarmfulWords) applyFeedback('error');
-            else if (builtMessage === solutionMessage) applyFeedback('success');
-            else applyFeedback('neutral');
-        }
-
-        function applyFeedback(type) {
-            const scenario = scenarios[currentScenarioIndex];
-            let icon, title, lexiVoice, newHearts;
-            
-            feedbackModal.className = 'modal-overlay ' + type;
-
-            switch (type) {
-                case 'success':
-                    positiveSound.play(); icon = '✨'; title = '¡Hechizo de Amabilidad Lanzado!';
-                    lexiVoice = (scenario.tipo === 'desacuerdo') ? '¡Excelente! Se puede estar en desacuerdo sin dejar de ser amigos.' : '¡Has hecho sentir bien a tu amigo!';
-                    newHearts = (scenario.tipo === 'desacuerdo') ? scenario.corazonesIniciales : 5;
-                    stats[scenario.tipo]++;
-                    totalHearts += (newHearts - (heartMeter.querySelectorAll('.full').length));
-                    setTimeout(nextScenario, 2000);
-                    break;
-                case 'error':
-                    negativeSound.play(); icon = '💔'; title = '¡Cuidado, Mensajero!';
-                    lexiVoice = '¡Esas palabras atacaron a tu amigo, no a su idea! ¡Su corazón se ha dañado!';
-                    newHearts = 1;
-                    break;
-                case 'neutral':
-                    neutralSound.play(); icon = '🤔'; title = 'Casi, casi...';
-                    lexiVoice = 'El hechizo no tuvo el efecto esperado. Revisa el orden de los ingredientes o si te falta alguno. ¡Inténtalo de nuevo!';
-                    newHearts = scenario.corazonesIniciales;
-                    break;
+                updateSlotVisuals(index);
             }
+        }
+
+        function updateSlotVisuals(index) {
+            const slots = document.querySelectorAll('.slot');
+            const slot = slots[index];
+            const word = filledSlots[index];
+
+            if (word) {
+                slot.textContent = word;
+                slot.classList.add('filled');
+                slot.onclick = () => removeWordFromSlot(index);
+            } else {
+                slot.textContent = '';
+                slot.classList.remove('filled');
+                slot.onclick = null;
+            }
+        }
+
+        // --- SISTEMA DE PISTAS (Recomendación) ---
+        function giveHint() {
+            // Buscar qué palabra va en el primer hueco vacío según la solución principal
+            const firstEmptyIndex = filledSlots.findIndex(s => s === null);
+            if (firstEmptyIndex === -1) return; // Todo lleno
+
+            const correctWordForThisSlot = currentLevelData.validSequences[0][firstEmptyIndex];
             
-            updateHeartMeter(newHearts);
-            document.getElementById('feedback-icon').textContent = icon;
-            document.getElementById('feedback-title').textContent = title;
-            document.getElementById('feedback-lexi-voice').textContent = `Lexi dice: "${lexiVoice}"`;
+            // Buscar el botón en el inventario
+            const btns = Array.from(document.querySelectorAll('.ingredient-btn'));
+            const targetBtn = btns.find(b => b.textContent === correctWordForThisSlot && !b.classList.contains('used'));
+
+            if (targetBtn) {
+                playTone('click');
+                targetBtn.classList.add('hint-glow');
+                setTimeout(() => targetBtn.classList.remove('hint-glow'), 2000);
+            }
+        }
+
+        // --- VALIDACIÓN Y FEEDBACK INTELIGENTE (Fuzzy Logic) ---
+
+        function checkAnswer() {
+            // Eliminar nulos para comparar
+            const userSentence = filledSlots.filter(w => w !== null);
+            
+            // 1. Chequeo de completitud
+            if (userSentence.length < currentLevelData.validSequences[0].length) {
+                showFeedback('neutral', '⚠️', 'Incompleto', 'Faltan palabras mágicas en tu mensaje. ¡Intenta llenar todos los huecos!');
+                return;
+            }
+
+            // 2. Chequeo de palabras dañinas (Prioridad Alta)
+            const hasHarm = userSentence.some(w => currentLevelData.harmfulWords.includes(w));
+            if (hasHarm) {
+                playTone('error');
+                showFeedback('error', '💔', '¡Cuidado!', 'Esas palabras pueden lastimar. Intenta ser más amable.');
+                renderHearts(1); // Romper corazón visualmente
+                return;
+            }
+
+            // 3. Chequeo de Coincidencia Exacta (con variantes permitidas)
+            let isExactMatch = false;
+            for (let seq of currentLevelData.validSequences) {
+                if (JSON.stringify(seq) === JSON.stringify(userSentence)) {
+                    isExactMatch = true;
+                    break;
+                }
+            }
+
+            if (isExactMatch) {
+                playTone('success');
+                renderHearts(5);
+                showFeedback('success', '✨', '¡Magia Pura!', '¡Has creado el mensaje perfecto! Tu amigo se siente mucho mejor.', 'next');
+                return;
+            }
+
+            // 4. Chequeo de "Intención" (Ingredientes correctos, orden incorrecto)
+            // Verificamos si tiene las palabras de la solución principal, aunque estén desordenadas
+            const solutionWords = [...currentLevelData.validSequences[0]].sort();
+            const userWordsSorted = [...userSentence].sort();
+            
+            if (JSON.stringify(solutionWords) === JSON.stringify(userWordsSorted)) {
+                showFeedback('neutral', '🤔', 'Casi casi...', '¡Tienes los ingredientes correctos! Pero el orden está un poco confuso. Intenta reordenarlos.');
+                return;
+            }
+
+            // 5. Fallo general
+            showFeedback('neutral', '🧐', 'Hmmm...', 'Esa combinación no suena del todo bien. Lexi dice: "' + currentLevelData.lexiHint + '"');
+        }
+
+        function showFeedback(type, icon, title, msg, action = null) {
+            const card = document.getElementById('feedback-card');
+            card.className = 'feedback-card feedback-' + type;
+            document.getElementById('fb-icon').textContent = icon;
+            document.getElementById('fb-title').textContent = title;
+            document.getElementById('fb-msg').textContent = msg;
+            
+            feedbackModal.dataset.action = action || '';
             feedbackModal.classList.remove('hidden');
-            feedbackModal.querySelector('.btn').focus();
         }
 
-        function updateHeartMeter(count, isInitial = false) {
-            heartMeter.innerHTML = '';
-            heartMeter.setAttribute('aria-label', `Medidor de Corazón: ${count} de 5 corazones.`);
-            for (let i = 0; i < 5; i++) {
-                const heart = document.createElement('span');
-                heart.className = 'heart';
-                heart.innerHTML = i < count ? '&#x2764;' : '&#x2764;';
-                if (i < count) heart.classList.add('full');
-                if (!isInitial && i < count) heart.style.animation = 'heart-beat 0.5s ease-in-out';
-                heartMeter.appendChild(heart);
-            }
-            if (count === 1) {
-                heartMeter.children[0].classList.add('cracked');
-                heartMeter.children[0].innerHTML = '&#x1F494;';
+        function nextLevel() {
+            if (currentLevelIndex + 1 < levels.length) {
+                loadLevel(currentLevelIndex + 1);
+            } else {
+                gameScreen.classList.add('hidden');
+                endScreen.classList.remove('hidden');
+                playTone('success');
             }
         }
 
-        function nextScenario() {
-            currentScenarioIndex++;
-            if (currentScenarioIndex < scenarios.length) renderScenario(currentScenarioIndex);
-            else showWinScreen();
-        }
-        
-        function showWinScreen() {
-            gameScreen.classList.add('hidden');
-            winScreen.classList.remove('hidden');
-            const winStats = document.getElementById('win-stats');
-            winStats.innerHTML = `Hoy consolaste a <strong>${stats.consuelo}</strong> amigo(s), expresaste <strong>${stats.desacuerdo}</strong> desacuerdo(s) con respeto, felicitaste a <strong>${stats.felicitacion}</strong> compañero(s), resolviste <strong>${stats.conflicto}</strong> malentendido(s) y ofreciste <strong>${stats.ayuda}</strong> vez/veces tu ayuda. ¡Has llenado el Foro con magia positiva!`;
-            const confettiContainer = document.getElementById('confetti-container');
-            confettiContainer.innerHTML = '';
-            for(let i=0; i<50; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.animationDelay = Math.random() * 5 + 's';
-                confetti.style.backgroundColor = ['#f6b93b', '#4a47a3', '#706fd3', '#ff4757'][Math.floor(Math.random()*4)];
-                confettiContainer.appendChild(confetti);
-            }
-        }
-
-        // --- FUNCIONES DE MODALES ---
-        function showRules() { rulesModal.classList.remove('hidden'); }
-        function hideRules() { rulesModal.classList.add('hidden'); }
-        function hideFeedback() { feedbackModal.classList.add('hidden'); }
-        
-        // --- INICIAR EL JUEGO ---
-        initGame();
-    });
     </script>
 </body>
 </html>
